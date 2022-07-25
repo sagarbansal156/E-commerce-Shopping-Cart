@@ -1,41 +1,33 @@
-// let jwt = require("jsonwebtoken")
-// const mongoose = require('mongoose');
-// const bookModel = require("../models/bookModel")
-// let decodedToken;
-
-// const isValidObjectId = (ObjectId) => {
-//   return mongoose.Types.ObjectId.isValid(ObjectId);   // to validate a MongoDB ObjectId we are use .isValid() method on ObjectId
-// };
-
-// /****************************************(Authentication)*****************************************************/
-// const authentication = async function (req, res, next) {
-//   try {
-//     let token = req.headers["x-api-key"] || req.headers["x-Api-key"];
-
-//     if (!token) return res.status(401).send({ status: false, message: "Missing authentication token in request" });
-
-//          decodedToken = jwt.verify(token, "Book-Management")
-
-//          req.decodedToken = decodedToken
-
-//         next();
-
-   
-
-//   } catch (error) {
-//     if (error.message == 'invalid token') return res.status(400).send({ status: false, message: "invalid token" });
-
-//     if (error.message == "jwt expired") return res.status(400).send({ status: false, message: "please login one more time, token is expired" });
-
-//     if (error.message == "invalid signature") return res.status(401).send({ status: false, message: "invalid signature" });
-
-//     return res.status(500).send({ status: false, message: error.message });
-//   }
-// };
+let jwt = require("jsonwebtoken")
+const mongoose = require('mongoose');
+const {isEmptyVar}=require("../validator/validate")
 
 
-  
-//   /*********************************************(Authorization)************************************************ */
+
+const isValidObjectId = (ObjectId) => {
+  return mongoose.Types.ObjectId.isValid(ObjectId);   // to validate a MongoDB ObjectId we are use .isValid() method on ObjectId
+};
+
+/****************************************(Authentication)*****************************************************/
+const authentication = (req, res, next) => {
+    try{
+        let token = req.headers.authorization
+        if(isEmptyVar(token)) return res.status(400).send({ status: false, Message: " The token must be required in 'Bearer'" })
+        // split and get the token only 
+        token = token.split(' ')[1] // get the 1 index value
+        jwt.verify(token,'secret',function(err,decode){
+            if(err){ 
+                return res.status(401).send({ status: false, Message: err.message })
+            }else{
+                req.tokenData = decode;
+                next()
+            }
+        })
+    }catch(err){
+        res.status(500).send({ status: false, Message: err.message })
+    }
+}
+  /*********************************************(Authorization)************************************************ */
 //   const authorise = async function (req, res, next) {
 //     try {
   
@@ -71,4 +63,4 @@
    
 //   }
   
-// module.exports = { authentication, authorise }
+module.exports = { authentication}

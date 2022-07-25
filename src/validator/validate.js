@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 let isEmptyObject = function (body) {
     if (!body) return true
     if (Object.keys(body).length == 0) return true;
@@ -26,8 +27,14 @@ let isValidPassword = function (password) {
     return passwordRegex.test(password)
 }
 
+const isValidObjectId = (ObjectId) => {
+    return mongoose.Types.ObjectId.isValid(ObjectId);   // to validate a MongoDB ObjectId we are use .isValid() method on ObjectId
+};
+
 module.exports = { isEmptyObject,
     isEmptyVar,
     isValidEmail,
     isValidPhone,
-    isValidPassword}
+    isValidPassword,
+    isValidObjectId
+}

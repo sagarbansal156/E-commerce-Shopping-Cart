@@ -3,7 +3,7 @@ const AwsService = require("../aws/AwsService")
 const bcrypt = require("bcrypt")
 const jwt=require("jsonwebtoken")
 
-const {isEmptyVar,isValidEmail,isValidPhone,isValidPassword,isEmptyObject}=require("../validator/validate")
+const {isEmptyVar,isValidEmail,isValidPhone,isValidPassword,isEmptyObject,isValidObjectId}=require("../validator/validate")
 
 
 
@@ -36,7 +36,7 @@ const register = async (req, res) => {
         if ((/^\d{6}$/).test(data['address.billing.pincode']))return res.status(400).send({ status: false, message: 'Enter the valid Pincode of address.billing.pincode' });
         
         //password
-        if (!isValidPassword(data.password))return res.status(400).send({status: false,message: 'Minimum password should be 8 and maximum will be 15'});
+        if (isValidPassword(data.password))return res.status(400).send({status: false,message: 'Minimum password should be 8 and maximum will be 15'});
         
 
         // if (file && file.length > 0) {
@@ -86,7 +86,7 @@ const login = async (req, res) => {
         const Token = jwt.sign({
             userId: user._id
         }, 'secret', {
-            expiresIn: '1h'
+            expiresIn: '10h'
         });
 
         // all good
@@ -108,4 +108,27 @@ const login = async (req, res) => {
 
 
 
-module.exports ={register,login}
+const getUser = async function (req, res) {
+
+    try {
+
+        let filter = req.params.userId
+
+        if (req.params.hasOwnProperty('userId')) {
+            if (!isValidObjectId(req.params.userId)) return res.status(400).send({ status: false, message: "please enter the valid userId!" })
+        }
+
+        let checkUser= await userModel.findOne({ _id: filter, isDeleted: false }) //Check book Name From DB/
+        if (!checkUser) return res.status(404).send({ status: true, message: "No such user found" });
+        
+        let getUserData = await userModel.findOne({ _id:filter, isDeleted: false })
+
+      return res.status(200).send({ status: true,message: "User profile details",data: getUserData });
+    } catch (err) {
+        return res.status(500).send({ status: false, message: err.message });
+    }
+};
+
+
+
+module.exports ={register,login,getUser}
