@@ -1,47 +1,43 @@
-const {isEmptyObject,isEmptyVar,isValidEmail,isValidPhone,isValidPassword}=require("../validator/validate")
+const userModel = require("../models/userModel")
+const AwsService = require("../aws/AwsService")
 const bcrypt = require("bcrypt")
 const jwt=require("jsonwebtoken")
-const userModel = require("../models/userModel")
+
+const {isEmptyVar,isValidEmail,isValidPhone,isValidPassword,isEmptyObject,isValidObjectId}=require("../validator/validate")
+
+
+
+
 const register = async (req, res) => {
     try {
         const data = req.body;
-        //const file = req.files;
+        const file = req.files;
 
         //const requiredFields = ['fname', 'lname', 'email', 'phone', 'password', 'address.shipping.street', 'address.shipping.city', 'address.shipping.pincode', 'address.billing.street', 'address.billing.city', 'address.billing.pincode'];
 
-      if(isEmptyVar(data)) return res.status(400).send({ status: false, message: 'Body cant be empty' });
+        if(isEmptyVar(data)) return res.status(400).send({ status: false, message: 'Body cant be empty' });
 
-        if (!isValidEmail(data.email)) {
-            return res.status(400).send({ status: false, message: 'Enter a valid Email Id' });
-        }
+        //fname and lname
+        if(isEmptyVar(data.fname))return res.status(400).send({ status: false, message: 'fname required' });
+        if(isEmptyVar(data.lname))return res.status(400).send({ status: false, message: 'lname required' });
 
+        //email
+        if (!isValidEmail(data.email))return res.status(400).send({ status: false, message: 'Enter a valid Email Id' });
         let isDuplicateEmail = await userModel.findOne({ email: data.email })
-        if (isDuplicateEmail) {
-            return res.status(400).send({ status: false, msg: "email already exists" })
-        }
-
-
-        if (!isValidPhone(data.phone)) {
-            return res.status(400).send({ status: false, message: 'The mobile number must be 10 digits and should be only Indian number' });
-        }
-
+        if (isDuplicateEmail)return res.status(400).send({ status: false, msg: "email already exists" })
+        
+        //mobile
+        if (!isValidPhone(data.phone))return res.status(400).send({ status: false, message: 'The mobile number must be 10 digits and should be only Indian number' });
         let duplicateMobile = await userModel.findOne({ phone: data.phone })
-        if (duplicateMobile) {
-            return res.status(400).send({ status: false, msg: "mobile number already exists" })
-        }
-
-        if ((/^\d{6}$/).test(data['address.shipping.pincode'])) {
-            return res.status(400).send({ status: false, message: 'Enter the valid Pincode of address.shipping.pincode' });
-        }
-
-
-        if ((/^\d{6}$/).test(data['address.billing.pincode'])) {
-            return res.status(400).send({ status: false, message: 'Enter the valid Pincode of address.billing.pincode' });
-        }
-
-        if (!(data.password.length > 8 && data.password.length <= 15)) {
-            return res.status(400).send({status: false,message: 'Minimum password should be 8 and maximum will be 15'});
-        }
+        if (duplicateMobile)return res.status(400).send({ status: false, msg: "mobile number already exists" })
+        
+        //address
+        if ((/^\d{6}$/).test(data['address.shipping.pincode']))return res.status(400).send({ status: false, message: 'Enter the valid Pincode of address.shipping.pincode' });
+        if ((/^\d{6}$/).test(data['address.billing.pincode']))return res.status(400).send({ status: false, message: 'Enter the valid Pincode of address.billing.pincode' });
+        
+        //password
+        if (isValidPassword(data.password))return res.status(400).send({status: false,message: 'Minimum password should be 8 and maximum will be 15'});
+        
 
         // if (file && file.length > 0) {
         //     if (file[0].mimetype.indexOf('image') == -1) {
@@ -60,7 +56,6 @@ const register = async (req, res) => {
     }
 }
 
-
 const login = async (req, res) => {
     try {
         //  get data from body
@@ -72,14 +67,11 @@ const login = async (req, res) => {
 
         //  Basic validations
         if (isEmptyVar(email)) return res.status(400).send({ status: false, message: " Email address must be required!" })
-
         if (!isValidEmail(email)) return res.status(400).send({ status: false, message: " Invalid Email address!" })
-
         if (isEmptyVar(password)) return res.status(400).send({ status: false, message: " Password must be required!" })
 
         //  db call for login and validation
         const user = await userModel.findOne({ email })
-
         if (!user) return res.status(404).send({ status: false, message: ` ${email} - related user does't exist!` })
 
         //  vfy the password
@@ -94,7 +86,7 @@ const login = async (req, res) => {
         const Token = jwt.sign({
             userId: user._id
         }, 'secret', {
-            expiresIn: '1h'
+            expiresIn: '10h'
         });
 
         // all good
@@ -116,6 +108,27 @@ const login = async (req, res) => {
 
 
 
-module.exports ={register,login}
+const getUser = async function (req, res) {
+
+    try {
+
+        let filter = req.params.userId
+
+        if (req.params.hasOwnProperty('userId')) {
+            if (!isValidObjectId(req.params.userId)) return res.status(400).send({ status: false, message: "please enter the valid userId!" })
+        }
+
+        let checkUser= await userModel.findOne({ _id: filter, isDeleted: false }) //Check book Name From DB/
+        if (!checkUser) return res.status(404).send({ status: true, message: "No such user found" });
+        
+        let getUserData = await userModel.findOne({ _id:filter, isDeleted: false })
+
+      return res.status(200).send({ status: true,message: "User profile details",data: getUserData });
+    } catch (err) {
+        return res.status(500).send({ status: false, message: err.message });
+    }
+};
 
 
+
+module.exports ={register,login,getUser}
