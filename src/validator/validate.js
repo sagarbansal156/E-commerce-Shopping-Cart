@@ -11,6 +11,9 @@ let isEmptyVar = function (value) {
    // if (value.trim().length === 0) return true;
     return false;
 }
+let isREgexName = function (attribute) {
+    return (/^[a-zA-Z]{2,20}$/.test(attribute.trim()))
+}
 
 let isValidPhone = function (number) {
     let phoneRegex = /^[6-9]\d{9}$/;
@@ -23,7 +26,8 @@ let isValidEmail = function (email) {
 }
 
 let isValidPassword = function (password) {
-    let passwordRegex = /^(?=.[0-9])(?=.[!@#$%^&])[a-zA-Z0-9!@#$%^&]{8,15}$/
+    let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/
+
     return passwordRegex.test(password)
 }
 
@@ -36,5 +40,6 @@ module.exports = { isEmptyObject,
     isValidEmail,
     isValidPhone,
     isValidPassword,
-    isValidObjectId
+    isValidObjectId,
+    isREgexName
 }
