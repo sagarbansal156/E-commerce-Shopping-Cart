@@ -12,12 +12,12 @@ const userSchema = new mongoose.Schema({
           shipping: {
             street: {type: String, required:true, trim:true},
             city: {type: String, required:true, trim:true},
-            pincode: {type: number, required:true, trim:true}
+            pincode: {type: Number, required:true, trim:true}
           },
           billing: {
             street: {type: String, required:true, trim:true},
             city: {type: String, required:true, trim:true},
-            pincode: {type: number, required:true, trim:true}
+            pincode: {type: Number, required:true, trim:true}
           }
         },
       }, { timestamps: true })

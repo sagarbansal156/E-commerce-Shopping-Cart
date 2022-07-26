@@ -1,5 +1,5 @@
 const express = require('express');
-const route = require('./route/route.js');
+const route = require('./route/routes.js');
 const multer = require("multer");
 
 const { default: mongoose } = require('mongoose'); 
@@ -7,7 +7,7 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.multer().any();
+//app.multer().any();
 
 mongoose.connect("mongodb+srv://bushra:euVDEv190AGHYJDI@cluster0.nwfddcm.mongodb.net/group14Database?retryWrites=true&w=majority",{
 
