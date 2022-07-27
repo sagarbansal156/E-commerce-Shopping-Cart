@@ -1,4 +1,5 @@
 const userModel = require("../models/userModel")
+
 const AwsService = require("../aws/AwsService")
 const bcrypt = require("bcrypt")
 const jwt=require("jsonwebtoken")
@@ -195,11 +196,11 @@ const updateUser = async (req, res) => {
             user.phone = phone
         }
 
-        if (!isEmptyVar(password)) {
-            if (!isValidPassword(password)) return res.status(400).send({ status: false, message: " Please enter a valid password [A-Z] [a-z] [0-9] !@#$%^& and length with in 8-15" })
-            const encryptedPassword = await bcrypt.hash(password, saltRounds)
-            user.password = encryptedPassword
-        }
+        // if (!isEmptyVar(password)) {
+        //     if (isValidPassword(password)) return res.status(400).send({ status: false, message: " Please enter a valid password [A-Z] [a-z] [0-9] !@#$%^& and length with in 8-15" })
+        //     const encryptedPassword = await bcrypt.hash(password, saltRounds)
+        //     user.password = encryptedPassword
+        // }
 
         if (!isEmptyVar(address)) {
             let addressObj = isValidJSONstr(address)
@@ -245,11 +246,15 @@ const updateUser = async (req, res) => {
 
         }
 
-        if (!isEmptyFile(files)) {
-            if (!acceptFileType(files[0], 'image/jpeg', 'image/png')) return res.status(400).send({ status: false, Message: "we accept jpg, jpeg or png as profile picture only" });
-
-            const profilePicture = await uploadFile(files[0])
-            user.profileImage = profilePicture
+        if (files && files.length > 0) {
+            if (files[0].mimetype.indexOf('image') == -1) {
+                return res.status(400).send({ status: false, message: 'Only image files are allowed !' })
+            }
+            const profile_url = await AwsService.uploadFile(files[0]);
+            data.profileImage = profile_url;
+        }
+        else {
+            return res.status(400).send({ status: false, message: 'Profile Image is required !' })
         }
 
         await user.save()
