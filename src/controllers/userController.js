@@ -3,7 +3,8 @@ const AwsService = require("../aws/AwsService")
 const bcrypt = require("bcrypt")
 const jwt=require("jsonwebtoken")
 
-const {isEmptyVar,isREgexName,isValidEmail,isValidPhone,isValidPassword,isEmptyObject,isValidObjectId}=require("../validator/validate")
+
+const {isEmptyVar,isREgexName,isValidEmail,isValidPhone,isValidPassword,isEmptyObject,isValidObjectId,isPincodeValid,isValidJSONstr,isEmptyFile,acceptFileType}=require("../validator/validate")
 
 
 
@@ -60,7 +61,7 @@ const register = async (req, res) => {
         console.log(data.address)
         //password
         if (isEmptyVar(data.password)) { return res.status(400).send({ status: false, message: "Password is required" }) }
-        if (!isValidPassword(data.password))return res.status(400).send({status: false,message: 'Password should be of 8 to 15 characters contains uupercase, lowercase, symbol and number' });
+        if (isValidPassword(data.password))return res.status(400).send({status: false,message: 'Password should be of 8 to 15 characters contains uupercase, lowercase, symbol and number' });
         
 
         if (file && file.length > 0) {
@@ -153,7 +154,117 @@ const getUser = async function (req, res) {
     }
 };
 
+const updateUser = async (req, res) => {
+    try {
+        //  get data from body
+        const data = req.body
+        const files = req.files
+        const userId = req.params.userId
+
+        if (isEmptyObject(data) && isEmptyFile(files)) return res.status(400).send({ status: false, message: " BODY must be required!" })
+
+        // get User by userID
+        const user = await userModel.findById(userId)
+        if (!user) return res.status(404).send({ status: false, message: " User data not found!" })
+
+        // de-structure data
+        let { fname, lname, email, phone, password, address } = data
 
 
+        if (isEmptyVar(fname)) {
+            user.fname = fname
+        }
 
-module.exports ={register,login,getUser}
+        if (isEmptyVar(lname)) {
+            user.lname = lname
+        }
+
+        if (!isEmptyVar(email)) {
+            if (!isValidEmail(email)) return res.status(400).send({ status: false, message: " Invalid email address!" })
+            let usedEmail = await userModel.findOne({ email: email });
+            if (usedEmail) return res.status(400).send({ status: false, Message: "This email is already registerd" });
+
+            user.email = email
+        }
+
+        if (!isEmptyVar(phone)) {
+            if (!isValidPhone(phone)) return res.status(400).send({ status: false, message: " Invalid phone number!" })
+            let usedMobileNumber = await userModel.findOne({ phone : phone });
+            if (usedMobileNumber) return res.status(400).send({ status: false, Message: "This Mobile no. is already registerd" });
+
+            user.phone = phone
+        }
+
+        if (!isEmptyVar(password)) {
+            if (!isValidPassword(password)) return res.status(400).send({ status: false, message: " Please enter a valid password [A-Z] [a-z] [0-9] !@#$%^& and length with in 8-15" })
+            const encryptedPassword = await bcrypt.hash(password, saltRounds)
+            user.password = encryptedPassword
+        }
+
+        if (!isEmptyVar(address)) {
+            let addressObj = isValidJSONstr(address)
+            if (!addressObj) return res.status(400).send({ status: false, message: " JSON address NOT in a valid structure, make it in a format!" })
+
+            address = addressObj
+            let {
+                shipping,
+                billing
+            } = address
+
+            // shipping address validation
+            if (!isEmptyObject(shipping)) {
+                if (!isEmptyVar(shipping.street)) {
+                    user.address.shipping.street = shipping.street
+                }
+
+                if (!isEmptyVar(shipping.city)) {
+                    user.address.shipping.city = shipping.city
+                }
+
+                if (!shipping.pincode || isNaN(shipping.pincode)) {
+                    if (!isPincodeValid(shipping.pincode)) return res.status(400).send({ status: false, Message: "Plz provide a valid pincode for shipping" });
+                    user.address.shipping.pincode = shipping.pincode
+                }
+            }
+
+            // billing address validation
+            if (!isEmptyObject(billing)) {
+                if (!isEmptyVar(billing.street)) {
+                    user.address.billing.street = billing.street
+                }
+
+                if (!isEmptyVar(billing.city)) {
+                    user.address.billing.city = billing.city
+                }
+
+                if (!billing.pincode || isNaN(billing.pincode)) {
+                    if (!isPincodeValid(billing.pincode)) return res.status(400).send({ status: false, Message: "Plz provide a valid pincode for billing" });
+                    user.address.billing.pincode = billing.pincode
+                }
+            }
+
+        }
+
+        if (!isEmptyFile(files)) {
+            if (!acceptFileType(files[0], 'image/jpeg', 'image/png')) return res.status(400).send({ status: false, Message: "we accept jpg, jpeg or png as profile picture only" });
+
+            const profilePicture = await uploadFile(files[0])
+            user.profileImage = profilePicture
+        }
+
+        await user.save()
+
+        res.status(200).send({status: true,Message: "User Updated successfully!",
+        data: user
+        })
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).send({
+            status: false,
+            Message: error.message
+        })
+    }
+}
+
+module.exports ={register,login,getUser,updateUser}
