@@ -6,12 +6,22 @@ let isEmptyObject = function (body) {
 }
 
 let isEmptyVar = function (value) {
-    if(!value) return true
-    if (typeof value === 'undefined' || value === null) return true;
-   // if (value.trim().length === 0) return true;
+    if(typeof value === "undefined" || typeof value === "null") return true;
+    if(typeof value === "string" && value.trim().length == 0) return true;
+    if(typeof value === "object" && Object.keys(value).length == 0) return true;
     return false;
 }
 
+let isREgexName = function (attribute) {
+    return (/^[a-zA-Z]{2,20}$/.test(attribute.trim()))
+}
+const isValidString = (String) => {
+    return /\d/.test(String)
+  }
+
+const isValidPrice = (price) => {
+    return /^[1-9]\d{0,7}(?:\.\d{1,2})?$/.test(price)
+  }
 let isValidPhone = function (number) {
     let phoneRegex = /^[6-9]\d{9}$/;
     return phoneRegex.test(number);
@@ -49,8 +59,15 @@ let isEmptyFile = (file) => {
 const acceptFileType = (file, ...types) => {
     return types.indexOf(file.mimetype) !== -1 ? true : false
 }
+
+const isValidSize = (sizes) => {
+    return ["S", "XS","M","X", "L","XXL", "XL"].includes(sizes);
+  }
 module.exports = { isEmptyObject,
     isEmptyVar,
+    isREgexName,
+    isValidString,
+    isValidPrice,
     isValidEmail,
     isValidPhone,
     isValidPassword,
@@ -58,5 +75,6 @@ module.exports = { isEmptyObject,
     isPincodeValid,
     isValidJSONstr,
     isEmptyFile,
-    acceptFileType
+    acceptFileType,
+    isValidSize
 }
