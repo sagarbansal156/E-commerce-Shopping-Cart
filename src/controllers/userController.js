@@ -7,20 +7,16 @@ const {isEmptyVar,isValidEmail,isValidPhone,isValidPassword,isEmptyObject,isVali
     acceptFileType}=require("../validator/validate")
 
 
-
-
 const register = async (req, res) => {
     try {
         const data = req.body;
         const file = req.files;
-
-        //const requiredFields = ['fname', 'lname', 'email', 'phone', 'password', 'address.shipping.street', 'address.shipping.city', 'address.shipping.pincode', 'address.billing.street', 'address.billing.city', 'address.billing.pincode'];
-
+        
         if(isEmptyVar(data)) return res.status(400).send({ status: false, message: 'Body cant be empty' });
 
         //fname and lname
-        if(isEmptyVar(data.fname))return res.status(400).send({ status: false, message: 'fname required' });
-        if(isEmptyVar(data.lname))return res.status(400).send({ status: false, message: 'lname required' });
+        if(!isEmptyVar(data.fname))return res.status(400).send({ status: false, message: 'fname required' });
+        if(!isEmptyVar(data.lname))return res.status(400).send({ status: false, message: 'lname required' });
 
         //email
         if (!isValidEmail(data.email))return res.status(400).send({ status: false, message: 'Enter a valid Email Id' });
@@ -56,6 +52,8 @@ const register = async (req, res) => {
         res.status(500).send({ status: false, error: err.message })
     }
 }
+
+
 
 const login = async (req, res) => {
     try {
@@ -109,6 +107,8 @@ const login = async (req, res) => {
 
 
 
+
+
 const getUser = async function (req, res) {
 
     try {
@@ -129,6 +129,8 @@ const getUser = async function (req, res) {
         return res.status(500).send({ status: false, message: err.message });
     }
 };
+
+
 
 const updateUser = async (req, res) => {
     try {
@@ -234,12 +236,9 @@ const updateUser = async (req, res) => {
         data: user
         })
 
-    } catch (error) {
-        console.log(error)
-        res.status(500).send({
-            status: false,
-            Message: error.message
-        })
+    } catch (err) {
+        console.log(err)
+        res.status(500).send({status: false,Message: err.message})
     }
 }
 
