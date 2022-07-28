@@ -92,6 +92,90 @@ const addProduct = async (req, res) => {
     }
   }
 
+  const getProudcts = async (req, res) => {
+    try {
+        const data = req.query;
+        const keys = Object.keys(data);
+
+        if (keys.length > 0) {
+            const requiredParams = ['size', 'name', 'priceGreaterThan', 'priceLessThan'];
+
+            for (let i = 0; i < keys.length; i++) {
+                if (!requiredParams.includes(keys[i])) {
+                    return res.status(400).send({ status: false, message: `Only these Query Params are allowed [${requiredParams.join(", ")}]` });
+                }
+            }
+
+            let queryData = {};
+            for (let i = 0; i < keys.length; i++) {
+                if (keys[i] == 'size') {
+                    queryData.availableSizes = data.size;
+                }
+                else if (keys[i] == 'name') {
+                    queryData.title = {
+                        $regex: new RegExp(`${data.name}`)
+                    };
+                }
+                else if (keys[i] == 'priceGreaterThan') {
+                    queryData.price = {
+                        $gt: data.priceGreaterThan
+                    }
+                }
+                else if (keys[i] == 'priceLessThan') {
+                    queryData.price = {
+                        $lt: data.priceLessThan
+                    }
+                }
+            }
+            console.log(queryData.title)
+            if (data['priceGreaterThan'] && data['priceLessThan']) {
+                queryData.price = {
+                    $gt: data.priceGreaterThan,
+                    $lt: data.priceLessThan
+                }
+            }
+            queryData.isDeleted = false;
+            queryData.deletedAt = null;
+
+            const filterData = await productModel.find(queryData).sort({ price: 1 });
+            console.log(filterData);
+            if (filterData.length == 0) {
+                return res.status(404).send({ status: false, message: 'Product not found !' });
+            }
+
+            return res.status(200).send({ status: true, message: 'fetch success', count: filterData.length, data: filterData });
+
+        }
+        else {
+            const fetchAllProducts = await productModel.find({ isDeleted: false, deletedAt: null }).sort({ price: 1 });
+            if (fetchAllProducts.length == 0) {
+                return res.status(404).send({ status: false, message: 'Product not found !' });
+            }
+            return res.status(200).send({ status: true, message: 'fetch success', count: fetchAllProducts.length, data: fetchAllProducts });
+        }
+    } catch (err) {
+        return res.status(500).send({ status: false, error: err.message });
+    }
+}
+
+const getProudctsById = async (req, res) => {
+  try {
+let filter = req.params.productId
+
+    if (req.params.hasOwnProperty('productId')) {
+        if (!validate.isValidObjectId(req.params.productId)) return res.status(400).send({ status: false, message: "Please enter the valid productId!" })
+    }
+
+    let checkProduct= await productModel.findOne({ _id: filter, isDeleted: false })
+    if (!checkProduct) return res.status(404).send({ status: true, message: "No such product found" });
+    
+    let getProductData = await productModel.findOne({ _id:filter, isDeleted: false })
+
+  return res.status(200).send({ status: true,message: "Product details",data: getProductData });
+} catch (err) {
+    return res.status(500).send({ status: false, message: err.message });
+}
+};
 
 
 
@@ -117,4 +201,4 @@ const addProduct = async (req, res) => {
 }
 
 
-  module.exports ={addProduct,deleteProduct}
+  module.exports ={addProduct,deleteProduct,getProudcts,getProudctsById}

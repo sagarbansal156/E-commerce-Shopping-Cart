@@ -41,20 +41,20 @@ const register = async (req, res) => {
         
         //address
      
-       if(isEmptyVar(data.address))return res.status(400).send({ status: false, message: 'address is need'})
-       data.address = JSON.parse(data.address)
+       if(!isEmptyVar(data.address))return res.status(400).send({ status: false, message: 'address is need'})
+    //    data.address = JSON.parse(data.address)
        
-            if (isEmptyVar(data.address.shipping.street)) {return res.status(400).send({status: false, message: "Street is required"}) }
-            if (!isEmptyVar(data.address.shipping.city)) { return res.status(400).send({ status: false, message: "City is required" }) }
-            if (!isEmptyVar(data.address.shipping.pincode)) { return res.status(400).send({ status: false, message: "Pincode is required" }) }
+            // if (isEmptyVar(data.address.shipping.street)) {return res.status(400).send({status: false, message: "Street is required"}) }
+            // if (!isEmptyVar(data.address.shipping.city)) { return res.status(400).send({ status: false, message: "City is required" }) }
+            // if (!isEmptyVar(data.address.shipping.pincode)) { return res.status(400).send({ status: false, message: "Pincode is required" }) }
 
-            if (!isEmptyVar(data.address.billing.street)) {return res.status(400).send({status: false, message: "Street of billing is required"}) }
-            if (!isEmptyVar(data.address.billing.city)) { return res.status(400).send({ status: false, message: "City of billing is required" }) }
-            if (!isEmptyVar(data.address.billing.pincode)) { return res.status(400).send({ status: false, message: "Pincode of billing is required" }) 
+            // if (!isEmptyVar(data.address.billing.street)) {return res.status(400).send({status: false, message: "Street of billing is required"}) }
+            // if (!isEmptyVar(data.address.billing.city)) { return res.status(400).send({ status: false, message: "City of billing is required" }) }
+            // if (!isEmptyVar(data.address.billing.pincode)) { return res.status(400).send({ status: false, message: "Pincode of billing is required" }) 
 
 
            // if (!/^(\d{4}|\d{6})$/.test(address.pincode)) { return res.status(400).send({ status: false, message: "Pincode is required" }) }
-        }
+        //}
 
 
         //if ((/^\d{6}$/).test(data['address.shipping.pincode']))return res.status(400).send({ status: false, message: 'Enter the valid Pincode of address.shipping.pincode' });
@@ -143,14 +143,19 @@ const getUser = async function (req, res) {
     try {
 
         let filter = req.params.userId
+        let validUserId = req.tokenData.userId
+
+       
 
         if (req.params.hasOwnProperty('userId')) {
             if (!isValidObjectId(req.params.userId)) return res.status(400).send({ status: false, message: "please enter the valid userId!" })
         }
 
+
         let checkUser= await userModel.findOne({ _id: filter, isDeleted: false }) //Check book Name From DB/
         if (!checkUser) return res.status(404).send({ status: true, message: "No such user found" });
-        
+        if(filter != validUserId) return res.status(400).send({ status: false, message: "please enter existing user" })
+
         let getUserData = await userModel.findOne({ _id:filter, isDeleted: false })
 
       return res.status(200).send({ status: true,message: "User profile details",data: getUserData });
@@ -167,12 +172,15 @@ const updateUser = async (req, res) => {
         const data = req.body
         const files = req.files
         const userId = req.params.userId
+        let validUserId = req.decodedToken.userId
+
 
         if (isEmptyObject(data) && isEmptyFile(files)) return res.status(400).send({ status: false, message: " BODY must be required!" })
 
         // get User by userID
         const user = await userModel.findById(userId)
         if (!user) return res.status(404).send({ status: false, message: " User data not found!" })
+        if (userId != validUserId) return res.status(403).send({ status: false, message: "Error, authorization failed" });
 
         // de-structure data
         let { fname, lname, email, phone, password, address } = data
