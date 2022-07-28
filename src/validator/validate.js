@@ -58,7 +58,7 @@ const acceptFileType = (file, ...types) => {
 const isValidSize = (sizes) => {
     return ["S", "XS","M","X", "L","XXL", "XL"].includes(sizes);
   }
-module.exports = { isEmptyObject,
+module.exports = {
     isEmptyVar,
     isREgexName,
     isValidString,

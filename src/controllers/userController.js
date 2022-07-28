@@ -35,7 +35,6 @@ const createUser = async function (req, res) {
 
         if (isEmptyVar(password)) return res.status(400).send({ status: false, Message: "Please provide password" })
 
-        console.log(isValidPassword(password))
         if (password.length < 8 || password.length > 15) {
             return res.status(400).send({
               status: false,
@@ -230,7 +229,12 @@ const updateUser = async (req, res) => {
         }
 
         if (!isEmptyVar(password)) {
-            if (isValidPassword(password)) return res.status(400).send({ status: false, message: " Please enter a valid password [A-Z] [a-z] [0-9] !@#$%^& and length with in 8-15" })
+            if (password.length < 8 || password.length > 15) {
+                return res.status(400).send({
+                  status: false,
+                  message: "password length should be between 8 to 15",
+                });
+              }
             const encryptedPassword = await bcrypt.hash(password, saltRounds)
             user.password = encryptedPassword
         }
