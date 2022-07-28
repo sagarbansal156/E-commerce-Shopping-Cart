@@ -2,6 +2,7 @@ const userModel = require("../models/userModel")
 const AwsService = require("../aws/AwsService")
 const bcrypt = require("bcrypt")
 const jwt=require("jsonwebtoken")
+const saltRounds = 10;
 
 const {isEmptyVar,isREgexName,isValidEmail,isValidPhone,isValidPassword,isValidObjectId,isPincodeValid,isValidJSONstr,isEmptyFile,acceptFileType}=require("../validator/validate")
 
