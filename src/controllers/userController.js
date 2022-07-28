@@ -42,15 +42,17 @@ const register = async (req, res) => {
         if (duplicateMobile)return res.status(400).send({ status: false, msg: "mobile number already exists" })
         
         //address
-       // data.address = JSON.parse(data.address)
-        if (data.address) {
-            if (!isEmptyVar(data.address.shipping.street)) {return res.status(400).send({status: false, message: "Street is required"}) }
+     
+       if(isEmptyVar(data.address))return res.status(400).send({ status: false, message: 'address is need'})
+       data.address = JSON.parse(data.address)
+       
+            if (isEmptyVar(data.address.shipping.street)) {return res.status(400).send({status: false, message: "Street is required"}) }
             if (!isEmptyVar(data.address.shipping.city)) { return res.status(400).send({ status: false, message: "City is required" }) }
             if (!isEmptyVar(data.address.shipping.pincode)) { return res.status(400).send({ status: false, message: "Pincode is required" }) }
 
             if (!isEmptyVar(data.address.billing.street)) {return res.status(400).send({status: false, message: "Street of billing is required"}) }
             if (!isEmptyVar(data.address.billing.city)) { return res.status(400).send({ status: false, message: "City of billing is required" }) }
-            if (!isEmptyVar(data.address.billing.pincode)) { return res.status(400).send({ status: false, message: "Pincode of billing is required" }) }
+            if (!isEmptyVar(data.address.billing.pincode)) { return res.status(400).send({ status: false, message: "Pincode of billing is required" }) 
 
 
            // if (!/^(\d{4}|\d{6})$/.test(address.pincode)) { return res.status(400).send({ status: false, message: "Pincode is required" }) }
