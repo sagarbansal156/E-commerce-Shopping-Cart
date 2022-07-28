@@ -3,15 +3,13 @@ const AwsService = require("../aws/AwsService")
 const bcrypt = require("bcrypt")
 const jwt=require("jsonwebtoken")
 
-const {isEmptyVar,isREgexName,isValidEmail,isValidPhone,isValidPassword,isEmptyObject,isValidObjectId,isPincodeValid,isValidJSONstr,isEmptyFile,acceptFileType}=require("../validator/validate")
-
-
+const {isEmptyVar,isREgexName,isValidEmail,isValidPhone,isValidPassword,isValidObjectId,isPincodeValid,isValidJSONstr,isEmptyFile,acceptFileType}=require("../validator/validate")
 
 const createUser = async function (req, res) {
     try {
         const requestBody = req.body
         //console.log(requestBody)
-        if (isEmptyObject(requestBody)) return res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
+        if (isEmptyVar(requestBody)) return res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
 
         let { fname, lname, email, phone, password, address } = requestBody
 
@@ -48,7 +46,7 @@ const createUser = async function (req, res) {
         if (isEmptyVar(address)) return res.status(400).send({ status: false, Message: "Please provide address" })
     
         // shipping address validation
-        if (isEmptyObject(address.shipping)) return res.status(400).send({ status: false, Message: "Please provide shipping address" })
+        if (isEmptyVar(address.shipping)) return res.status(400).send({ status: false, Message: "Please provide shipping address" })
 
         if (isEmptyVar(address.shipping.street)) return res.status(400).send({ status: false, Message: "Plz provide shipping street..!!" });
 
@@ -115,7 +113,7 @@ const login = async (req, res) => {
     try {
         //  get data from body
         const data = req.body
-        if (isEmptyObject(data)) return res.status(400).send({ status: false, message: " Login BODY must be required!" })
+        if (isEmptyVar(data)) return res.status(400).send({ status: false, message: " Login BODY must be required!" })
 
         //  de-structure data 
         let { email, password } = data;
@@ -197,7 +195,7 @@ const updateUser = async (req, res) => {
         const files = req.files
         const userId = req.params.userId
 
-        if (isEmptyObject(data) && isEmptyFile(files)) return res.status(400).send({ status: false, message: " BODY must be required!" })
+        if (isEmptyVar(data) && isEmptyFile(files)) return res.status(400).send({ status: false, message: " BODY must be required!" })
 
         // get User by userID
         const user = await userModel.findById(userId)
@@ -248,7 +246,7 @@ const updateUser = async (req, res) => {
             } = address
 
             // shipping address validation
-            if (!isEmptyObject(shipping)) {
+            if (!isEmptyVar(shipping)) {
                 if (!isEmptyVar(shipping.street)) {
                     user.address.shipping.street = shipping.street
                 }
@@ -264,7 +262,7 @@ const updateUser = async (req, res) => {
             }
 
             // billing address validation
-            if (!isEmptyObject(billing)) {
+            if (!isEmptyVar(billing)) {
                 if (!isEmptyVar(billing.street)) {
                     user.address.billing.street = billing.street
                 }

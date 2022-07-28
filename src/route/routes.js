@@ -15,7 +15,7 @@ router.put("/user/:userId/profile",userController.updateUser);
 //----------product Api----------------//
 router.post("/products", productController.addProduct);
 router.delete("/products/:productId", productController.deleteProduct);
-
+router.put("/products/:productId",productController.updateProductById);
 
 
 
