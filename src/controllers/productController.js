@@ -92,6 +92,26 @@ const addProduct = async (req, res) => {
     }
   }
 
+  const getProudctsById = async (req, res) => {
+    try {
+  let filter = req.params.productId
+  
+      if (req.params.hasOwnProperty('productId')) {
+          if (!validate.isValidObjectId(req.params.productId)) return res.status(400).send({ status: false, message: "Please enter the valid productId!" })
+      }
+  
+      let checkProduct= await productModel.findOne({ _id: filter, isDeleted: false })
+      if (!checkProduct) return res.status(404).send({ status: true, message: "No such product found" });
+      
+      let getProductData = await productModel.findOne({ _id:filter, isDeleted: false })
+  
+    return res.status(200).send({ status: true,message: "Product details",data: getProductData });
+  } catch (err) {
+      return res.status(500).send({ status: false, message: err.message });
+  }
+  };
+  
+
 
   const updateProductById = async function (req, res) {
     try {
@@ -150,9 +170,9 @@ const addProduct = async (req, res) => {
           const profile_url = await AwsService.uploadFile(files[0]);
           checkProductId.productImage = profile_url
       }
-      else {
-          return res.status(400).send({ status: false, message: 'Profile Image is required !' })
-      }
+      // else {
+          // return res.status(400).send({ status: false, message: 'Profile Image is required !' })
+      // }
 
         await checkProductId.save();
         res.status(200).send({ status: true, message: " Product info updated successfully!", data: checkProductId });
@@ -167,7 +187,7 @@ const addProduct = async (req, res) => {
         // get params product id
         const productId = req.params.productId;
         //  check product id is a valid object id or not
-        if (!validate.isValidObjectId(productId)) return res.status(400).send({ status: false, Message: " Invalid ProjectID!" })
+        if (!validate.isValidObjectId(productId)) return res.status(400).send({ status: false, Message: " Invalid ProductId!" })
         // find product by id
         const product = await productModel.findById(productId)
         if (!product) return res.status(404).send({ status: false, Message: " Product information unavailable!" })
@@ -183,5 +203,4 @@ const addProduct = async (req, res) => {
     }
 }
 
-
-  module.exports ={addProduct,deleteProduct,updateProductById}
+  module.exports ={addProduct,getProudctsById,deleteProduct,updateProductById}
