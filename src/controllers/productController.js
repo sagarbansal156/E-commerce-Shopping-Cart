@@ -92,4 +92,29 @@ const addProduct = async (req, res) => {
     }
   }
 
-  module.exports ={addProduct}
+
+
+
+  const deleteProduct = async (req, res) => {
+    try {
+        // get params product id
+        const productId = req.params.productId;
+        //  check product id is a valid object id or not
+        if (!validate.isValidObjectId(productId)) return res.status(400).send({ status: false, Message: " Invalid ProjectID!" })
+        // find product by id
+        const product = await productModel.findById(productId)
+        if (!product) return res.status(404).send({ status: false, Message: " Product information unavailable!" })
+        if (product.isDeleted) return res.status(400).send({ status: false, Message: " Product already deleted!" })
+
+        // execute delete here
+        product.isDeleted = true;
+        product.deletedAt = new Date();
+        await product.save();
+        res.status(200).send({ status: true, Message: " Product deleted successfully!" })
+    } catch (err) {
+        res.status(500).send({ status: true, Message: err.message })
+    }
+}
+
+
+  module.exports ={addProduct,deleteProduct}

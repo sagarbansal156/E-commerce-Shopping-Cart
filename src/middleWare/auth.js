@@ -2,12 +2,6 @@ let jwt = require("jsonwebtoken")
 const mongoose = require('mongoose');
 const {isEmptyVar}=require("../validator/validate")
 
-
-
-const isValidObjectId = (ObjectId) => {
-  return mongoose.Types.ObjectId.isValid(ObjectId);   // to validate a MongoDB ObjectId we are use .isValid() method on ObjectId
-};
-
 /****************************************(Authentication)*****************************************************/
 const authentication = (req, res, next) => {
     try{

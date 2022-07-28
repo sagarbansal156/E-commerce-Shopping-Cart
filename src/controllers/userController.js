@@ -8,8 +8,6 @@ const jwt=require("jsonwebtoken")
 const {isEmptyVar,isREgexName,isValidEmail,isValidPhone,isValidPassword,isEmptyObject,isValidObjectId,isPincodeValid,isValidJSONstr,isEmptyFile,acceptFileType}=require("../validator/validate")
 
 
-
-
 const register = async (req, res) => {
     try {
         const data = req.body;
@@ -84,6 +82,8 @@ const register = async (req, res) => {
     }
 }
 
+
+
 const login = async (req, res) => {
     try {
         //  get data from body
@@ -136,6 +136,8 @@ const login = async (req, res) => {
 
 
 
+
+
 const getUser = async function (req, res) {
 
     try {
@@ -156,6 +158,8 @@ const getUser = async function (req, res) {
         return res.status(500).send({ status: false, message: err.message });
     }
 };
+
+
 
 const updateUser = async (req, res) => {
     try {
@@ -265,12 +269,9 @@ const updateUser = async (req, res) => {
         data: user
         })
 
-    } catch (error) {
-        console.log(error)
-        res.status(500).send({
-            status: false,
-            Message: error.message
-        })
+    } catch (err) {
+        console.log(err)
+        res.status(500).send({status: false,Message: err.message})
     }
 }
 
