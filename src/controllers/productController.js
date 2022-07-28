@@ -98,9 +98,9 @@ const addProduct = async (req, res) => {
         const requestBody = req.body
         const productId = req.params.productId
         const files = req.files
-        if(isEmptyVar(requestBody) && isEmptyFile(files)){ return res.status(400).send({ status: false, Message: "Body is required" }) }
+        if(validate.isEmptyVar(requestBody) && validate.isEmptyFile(files)){ return res.status(400).send({ status: false, Message: "Body is required" }) }
 
-        if (!isValidObjectId(productId)) { return res.status(400).send({ status: false, Message: "Invalid productId" }) }
+        if (!validate.isValidObjectId(productId)) { return res.status(400).send({ status: false, Message: "Invalid productId" }) }
 
         const checkProductId = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!checkProductId) { return res.status(404).send({ status: false, Message: 'Product not found' }) }
@@ -109,17 +109,17 @@ const addProduct = async (req, res) => {
 
         // const checkProductId = {}
 
-        if (!isEmptyVar(description)) { checkProductId.description = description }
-        if (!isEmptyVar(price)) {
+        if (!validate.isEmptyVar(description)) { checkProductId.description = description }
+        if (!validate.isEmptyVar(price)) {
             if (!Number(price)) return res.status(400).send({ status: false, message: " price only accept numbers like [1-9]!" });
             checkProductId.price = price
         }
-        if (!isEmptyVar(currencyId)) { checkProductId.currencyId = currencyId }
-        if (!isEmptyVar(isFreeShipping)) { checkProductId.isFreeShipping = isFreeShipping }
-        if (!isEmptyVar(currencyFormat)) { checkProductId.currencyFormat = currencyFormat }
-        if (!isEmptyVar(style)) { checkProductId.style = style }
-        if (!isEmptyVar(installments)) { checkProductId.installments = installments }
-        if (!isEmptyVar(availableSizes)) {
+        if (!validate.isEmptyVar(currencyId)) { checkProductId.currencyId = currencyId }
+        if (!validate.isEmptyVar(isFreeShipping)) { checkProductId.isFreeShipping = isFreeShipping }
+        if (!validate.isEmptyVar(currencyFormat)) { checkProductId.currencyFormat = currencyFormat }
+        if (!validate.isEmptyVar(style)) { checkProductId.style = style }
+        if (!validate.isEmptyVar(installments)) { checkProductId.installments = installments }
+        if (!validate.isEmptyVar(availableSizes)) {
             // approach 1
             let availableSizeObj = isValidJSONstr(availableSizes)
             if (!availableSizeObj) 
@@ -137,7 +137,7 @@ const addProduct = async (req, res) => {
             checkProductId.availableSizes = tempArr
          }
 
-        if (!isEmptyVar(title)) {
+        if (!validate.isEmptyVar(title)) {
             const isTitleAlreadyUsed = await productModel.findOne({  title: title });
             if (isTitleAlreadyUsed) { return res.status(400).send({ status: false, Message: `title, ${title} already exist ` }) }
             checkProductId.title = title

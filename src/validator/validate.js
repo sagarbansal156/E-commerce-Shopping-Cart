@@ -1,9 +1,4 @@
 const mongoose = require('mongoose');
-let isEmptyObject = function (body) {
-    if (!body) return true
-    if (Object.keys(body).length == 0) return true;
-    return false;
-}
 
 let isEmptyVar = function (value) {
     if(typeof value === "undefined" || typeof value === "null") return true;
