@@ -1,9 +1,4 @@
 const mongoose = require('mongoose');
-let isEmptyObject = function (body) {
-    if (!body) return true
-    if (Object.keys(body).length == 0) return true;
-    return false;
-}
 
 let isEmptyVar = function (value) {
     if(typeof value === "undefined" || typeof value === "null") return true;
@@ -13,7 +8,7 @@ let isEmptyVar = function (value) {
 }
 
 let isREgexName = function (attribute) {
-    return (/^[a-zA-Z]{2,20}$/.test(attribute.trim()))
+    return (/^[a-zA-Z_ ]{2,20}$/.test(attribute.trim()))
 }
 const isValidString = (String) => {
     return /\d/.test(String)
@@ -33,7 +28,7 @@ let isValidEmail = function (email) {
 }
 
 let isValidPassword = function (password) {
-    let passwordRegex = /^(?=.[0-9])(?=.[!@#$%^&])[a-zA-Z0-9!@#$%^&]{8,15}$/
+    let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/
     return passwordRegex.test(password)
 }
 
@@ -63,7 +58,7 @@ const acceptFileType = (file, ...types) => {
 const isValidSize = (sizes) => {
     return ["S", "XS","M","X", "L","XXL", "XL"].includes(sizes);
   }
-module.exports = { isEmptyObject,
+module.exports = {
     isEmptyVar,
     isREgexName,
     isValidString,

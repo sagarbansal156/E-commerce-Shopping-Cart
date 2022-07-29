@@ -176,15 +176,82 @@ let filter = req.params.productId
     return res.status(500).send({ status: false, message: err.message });
 }
 };
+  
+const updateProductById = async function (req, res) {
+    try {
+        const requestBody = req.body
+        const productId = req.params.productId
+        const files = req.files
+        if(validate.isEmptyVar(requestBody) && validate.isEmptyFile(files)){ return res.status(400).send({ status: false, Message: "Body is required" }) }
 
+        if (!validate.isValidObjectId(productId)) { return res.status(400).send({ status: false, Message: "Invalid productId" }) }
 
+        const checkProductId = await productModel.findOne({ _id: productId, isDeleted: false })
+        if (!checkProductId) { return res.status(404).send({ status: false, Message: 'Product not found' }) }
+
+        const { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments } = requestBody;
+
+        // const checkProductId = {}
+
+        if (!validate.isEmptyVar(description)) { checkProductId.description = description }
+        if (!validate.isEmptyVar(price)) {
+            if (!Number(price)) return res.status(400).send({ status: false, message: " price only accept numbers like [1-9]!" });
+            checkProductId.price = price
+        }
+        if (!validate.isEmptyVar(currencyId)) { checkProductId.currencyId = currencyId }
+        if (!validate.isEmptyVar(isFreeShipping)) { checkProductId.isFreeShipping = isFreeShipping }
+        if (!validate.isEmptyVar(currencyFormat)) { checkProductId.currencyFormat = currencyFormat }
+        if (!validate.isEmptyVar(style)) { checkProductId.style = style }
+        if (!validate.isEmptyVar(installments)) { checkProductId.installments = installments }
+        if (!validate.isEmptyVar(availableSizes)) {
+            // approach 1
+            let availableSizeObj = isValidJSONstr(availableSizes)
+            if (!availableSizeObj) 
+            return res.status(400).send({ status: false, Message: `in availableSizes, invalid json !` })
+
+            if (!Array.isArray(availableSizeObj)) 
+            return res.status(400).send({ status: false, Message: ` in availableSizes, invalid array !` })
+
+            if (!checkArrContent(availableSizeObj, "S", "XS", "M", "X", "L", "XXL", "XL")) 
+            return res.status(400).send({ status: false, Message: ` availableSizes is only accept S , XS , M , X , L , XXL , XL !` })
+
+            let tempArr = [...checkProductId.availableSizes]
+            tempArr.push(...availableSizeObj)
+            tempArr = [...new Set(tempArr)] // set {"S", "XS", "M"}
+            checkProductId.availableSizes = tempArr
+         }
+
+        if (!validate.isEmptyVar(title)) {
+            const isTitleAlreadyUsed = await productModel.findOne({  title: title });
+            if (isTitleAlreadyUsed) { return res.status(400).send({ status: false, Message: `title, ${title} already exist ` }) }
+            checkProductId.title = title
+        }
+
+        if (files && files.length > 0) {
+          if (files[0].mimetype.indexOf('image') == -1) {
+              return res.status(400).send({ status: false, message: 'Only image files are allowed !' })
+          }
+          const profile_url = await AwsService.uploadFile(files[0]);
+          checkProductId.productImage = profile_url
+      }
+      else {
+          return res.status(400).send({ status: false, message: 'Profile Image is required !' })
+      }
+
+        await checkProductId.save();
+        res.status(200).send({ status: true, message: " Product info updated successfully!", data: checkProductId });
+    } catch (error) {
+        return res.status(500).send({ status: false, message: error.message });
+    }
+
+}
 
   const deleteProduct = async (req, res) => {
     try {
         // get params product id
         const productId = req.params.productId;
         //  check product id is a valid object id or not
-        if (!validate.isValidObjectId(productId)) return res.status(400).send({ status: false, Message: " Invalid ProjectID!" })
+        if (!validate.isValidObjectId(productId)) return res.status(400).send({ status: false, Message: " Invalid ProductId!" })
         // find product by id
         const product = await productModel.findById(productId)
         if (!product) return res.status(404).send({ status: false, Message: " Product information unavailable!" })
@@ -200,5 +267,4 @@ let filter = req.params.productId
     }
 }
 
-
-  module.exports ={addProduct,deleteProduct,getProudcts,getProudctsById}
+  module.exports ={addProduct,getProudcts,getProudctsById,deleteProduct,updateProductById}
