@@ -8,7 +8,7 @@ let isEmptyVar = function (value) {
 }
 
 let isREgexName = function (attribute) {
-    return (/^[a-zA-Z]{2,20}$/.test(attribute.trim()))
+    return (/^[a-zA-Z_ ]{2,20}$/.test(attribute.trim()))
 }
 const isValidString = (String) => {
     return /\d/.test(String)
@@ -26,7 +26,7 @@ let isValidEmail = function (email) {
     let emailRegex = /^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/
     return emailRegex.test(email)
 }
-//"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,10}$"
+
 let isValidPassword = function (password) {
     let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/
     return passwordRegex.test(password)
