@@ -205,11 +205,11 @@ const updateUser = async (req, res) => {
         let { fname, lname, email, phone, password, address } = data
 
 
-        if (isEmptyVar(fname)) {
+        if (!isEmptyVar(fname)) {
             user.fname = fname
         }
 
-        if (isEmptyVar(lname)) {
+        if (!isEmptyVar(lname)) {
             user.lname = lname
         }
 
@@ -241,44 +241,35 @@ const updateUser = async (req, res) => {
         }
 
         if (!isEmptyVar(address)) {
-            let addressObj = isValidJSONstr(address)
-            if (!addressObj) return res.status(400).send({ status: false, message: " JSON address NOT in a valid structure, make it in a format!" })
-
-            address = addressObj
-            let {
-                shipping,
-                billing
-            } = address
-
-            // shipping address validation
-            if (!isEmptyVar(shipping)) {
-                if (!isEmptyVar(shipping.street)) {
-                    user.address.shipping.street = shipping.street
+          // shipping address validation
+            if (!isEmptyVar(address.shipping)) {
+                if (!isEmptyVar(address.shipping.street)) {
+                    user.address.shipping.street = address.shipping.street
                 }
 
-                if (!isEmptyVar(shipping.city)) {
-                    user.address.shipping.city = shipping.city
+                if (!isEmptyVar(address.shipping.city)) {
+                    user.address.shipping.city = address.shipping.city
                 }
 
-                if (!shipping.pincode || isNaN(shipping.pincode)) {
-                    if (!isPincodeValid(shipping.pincode)) return res.status(400).send({ status: false, Message: "Plz provide a valid pincode for shipping" });
-                    user.address.shipping.pincode = shipping.pincode
+                if (!address.shipping.pincode || isNaN(address.shipping.pincode)) {
+                    if (!isPincodeValid(address.shipping.pincode)) return res.status(400).send({ status: false, Message: "Plz provide a valid pincode for shipping" });
+                    user.address.shipping.pincode = address.shipping.pincode
                 }
             }
 
             // billing address validation
-            if (!isEmptyVar(billing)) {
-                if (!isEmptyVar(billing.street)) {
-                    user.address.billing.street = billing.street
+            if (!isEmptyVar(address.billing)) {
+                if (!isEmptyVar(address.billing.street)) {
+                    user.address.billing.street = address.billing.street
                 }
 
-                if (!isEmptyVar(billing.city)) {
-                    user.address.billing.city = billing.city
+                if (!isEmptyVar(address.billing.city)) {
+                    user.address.billing.city = address.billing.city
                 }
 
-                if (!billing.pincode || isNaN(billing.pincode)) {
+                if (!address.billing.pincode || isNaN(address.billing.pincode)) {
                     if (!isPincodeValid(billing.pincode)) return res.status(400).send({ status: false, Message: "Plz provide a valid pincode for billing" });
-                    user.address.billing.pincode = billing.pincode
+                    user.address.billing.pincode = address.billing.pincode
                 }
             }
 
@@ -289,7 +280,7 @@ const updateUser = async (req, res) => {
                 return res.status(400).send({ status: false, message: 'Only image files are allowed !' })
             }
             const profile_url = await AwsService.uploadFile(files[0]);
-            data.profileImage = profile_url;
+            user.profileImage = profile_url;
         }
         else {
             return res.status(400).send({ status: false, message: 'Profile Image is required !' })
