@@ -3,7 +3,7 @@ const AwsService = require("../aws/AwsService")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 
-const { isEmptyVar, isREgexName, isValidEmail, isValidPhone, isValidPassword, isValidObjectId, isPincodeValid, isValidJSONstr, isEmptyFile, acceptFileType } = require("../validator/validate")
+const { isEmptyVar, isREgexName, isValidEmail, isValidPhone, isValidPassword, isValidObjectId, isPincodeValid, isEmptyFile } = require("../validator/validate")
 
 const createUser = async function (req, res) {
     try {
@@ -162,7 +162,7 @@ const getUser = async function (req, res) {
 const updateUser = async (req, res) => {
     try {
         //  get data from body
-        
+
         const data = req.body
         const files = req.files
         const userId = req.params.userId
@@ -189,10 +189,12 @@ const updateUser = async (req, res) => {
 
 
         if (!isEmptyVar(fname)) {
+            if (!isREgexName(fname)) return res.status(400).send({ status: false, Message: "Please provide user's first name in alphabets" })
             user.fname = fname
         }
 
         if (!isEmptyVar(lname)) {
+            if (!isREgexName(lname)) return res.status(400).send({ status: false, Message: "Please provide user's last name in alphabets" })
             user.lname = lname
         }
 
@@ -232,6 +234,7 @@ const updateUser = async (req, res) => {
 
         if (!isEmptyVar(address)) {
           // shipping address validation
+            // shipping address validation
             if (!isEmptyVar(address.shipping)) {
                 if (!isEmptyVar(address.shipping.street)) {
                     user.address.shipping.street = address.shipping.street
