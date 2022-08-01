@@ -10,27 +10,25 @@ const addProduct = async (req, res) => {
       //checking for the valid data
       if(validate.isEmptyVar(data)) return res.status(400).send({ status: false, message: "Enter details of the product" });
   
-      //checking for product title
+      //product title
       if(validate.isEmptyVar(data.title)) return res.status(400).send({ status: false, message: "Title is required and should not be an empty string" });
   
-      //checking for duplicate title
+      //duplicate title
       let checkTitle = await productModel.findOne({ title: data.title });
       if(checkTitle) return res.status(400).send({ status: false, message: "Title already exist" });
   
-      //checking for product description
-      if(validate.isEmptyVar(data.description) && validate.isValidString(data.description)) return res.status(400).send({ status: false, message: "Description is required and should not be an empty string or any numbers in it" });
+      //product description
+      if(validate.isEmptyVar(data.description)) return res.status(400).send({ status: false, message: "Description is required and should not be an empty string or any numbers in it" });
   
-      //checking for product price
+      //product price
       if(!(validate.isValidString(data.price) && validate.isValidPrice(data.price))) return res.status(400).send({ status: false, message: "Price of product should be valid and in numbers" });
   
-      //checking for currencyId 
+      //currencyId 
       if(validate.isEmptyVar(data.currencyId)) return res.status(400).send({ status: false, message: "Currency Id of product is required and should not be an empty spaces" });
-  
       if(!(/INR/.test(data.currencyId))) return res.status(400).send({ status: false, message: "Currency Id of product should be in uppercase 'INR' format" });
   
-      //checking for currency formate
+      //currency formate
       if(validate.isEmptyVar(data.currencyFormat)) return res.status(400).send({ status: false, message: "Currency format of product is required and should not be an empty spaces" });
-  
       if(!(/₹/.test(data.currencyFormat))) return res.status(400).send({ status: false, message: "Currency format/symbol of product should be in '₹' " });
   
       //checking freeShipping value is present
@@ -39,11 +37,12 @@ const addProduct = async (req, res) => {
         if(validate.isEmptyVar(data.isFreeShipping)) return res.status(400).send({ status: false, message: "Enter a valid value for is free shipping" })
         if(typeof data.isFreeShipping == 'string'){
           //converting it to lowercase and removing white spaces
-          data.isFreeShipping = data.isFreeShipping.toLowerCase().trim();;
+          data.isFreeShipping = data.isFreeShipping.toLowerCase().trim();
           if(data.isFreeShipping == 'true' || data.isFreeShipping == 'false') {
             //convert from string to boolean
             data.isFreeShipping = JSON.parse(data.isFreeShipping);
-          }else {
+
+            }else {
             return res.status(400).send({ status: false, message: "Enter a valid value for isFreeShipping" })
           }
         }
@@ -127,7 +126,6 @@ const addProduct = async (req, res) => {
                     }
                 }
             }
-            console.log(queryData.title)
             if (data['priceGreaterThan'] && data['priceLessThan']) {
                 queryData.price = {
                     $gt: data.priceGreaterThan,
@@ -138,7 +136,6 @@ const addProduct = async (req, res) => {
             queryData.deletedAt = null;
 
             const filterData = await productModel.find(queryData).sort({ price: 1 });
-            console.log(filterData);
             if (filterData.length == 0) {
                 return res.status(404).send({ status: false, message: 'Product not found !' });
             }
@@ -205,7 +202,8 @@ const updateProductById = async function (req, res) {
         if (!validate.isEmptyVar(installments)) { checkProductId.installments = installments }
         if (!validate.isEmptyVar(availableSizes)) {
             // approach 1
-            let availableSizeObj = isValidJSONstr(availableSizes)
+            let availableSizeObj = validate.isValidJSONstr(availableSizes)
+
             if (!availableSizeObj) 
             return res.status(400).send({ status: false, Message: `in availableSizes, invalid json !` })
 
