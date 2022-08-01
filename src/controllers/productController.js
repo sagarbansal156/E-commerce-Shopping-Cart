@@ -204,21 +204,12 @@ const updateProductById = async function (req, res) {
         if (!validate.isEmptyVar(style)) { checkProductId.style = style }
         if (!validate.isEmptyVar(installments)) { checkProductId.installments = installments }
         if (!validate.isEmptyVar(availableSizes)) {
-            // approach 1
-            let availableSizeObj = isValidJSONstr(availableSizes)
-            if (!availableSizeObj) 
-            return res.status(400).send({ status: false, Message: `in availableSizes, invalid json !` })
-
-            if (!Array.isArray(availableSizeObj)) 
-            return res.status(400).send({ status: false, Message: ` in availableSizes, invalid array !` })
-
-            if (!checkArrContent(availableSizeObj, "S", "XS", "M", "X", "L", "XXL", "XL")) 
-            return res.status(400).send({ status: false, Message: ` availableSizes is only accept S , XS , M , X , L , XXL , XL !` })
-
-            let tempArr = [...checkProductId.availableSizes]
-            tempArr.push(...availableSizeObj)
-            tempArr = [...new Set(tempArr)] // set {"S", "XS", "M"}
-            checkProductId.availableSizes = tempArr
+          
+          if (!validate.isEmptyVar(availableSizes)) {
+                if (!validate.isValidSize(availableSizes)) 
+                return res.status(400).send({ status: false, Message: ` availableSizes is only accept S , XS , M , X , L , XXL , XL !` })
+                 checkProductId.availableSizes.push(availableSizes)
+             }
          }
 
         if (!validate.isEmptyVar(title)) {
@@ -234,10 +225,7 @@ const updateProductById = async function (req, res) {
           const profile_url = await AwsService.uploadFile(files[0]);
           checkProductId.productImage = profile_url
       }
-      else {
-          return res.status(400).send({ status: false, message: 'Profile Image is required !' })
-      }
-
+      
         await checkProductId.save();
         res.status(200).send({ status: true, message: " Product info updated successfully!", data: checkProductId });
     } catch (error) {

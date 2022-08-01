@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require("../controllers/userController")
 const productController = require("../controllers/productController")
-
+const cart = require("../controllers/cartController")
 const middleWare = require("../middleWare/auth")
 
 
@@ -18,6 +18,10 @@ router.get("/products", productController.getProudcts);//by query
 router.get("/products/:productId", productController.getProudctsById);//by params
 router.delete("/products/:productId", productController.deleteProduct);
 router.put("/products/:productId",productController.updateProductById);
+
+//--------cart Api-----------//
+router.post('/users/:userId/cart', cart.create)
+
 
 
 
