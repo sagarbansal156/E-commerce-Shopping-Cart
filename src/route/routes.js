@@ -20,7 +20,9 @@ router.delete("/products/:productId", productController.deleteProduct);
 router.put("/products/:productId",productController.updateProductById);
 
 //--------cart Api-----------//
-router.post('/users/:userId/cart', cart.create)
+router.post('/users/:userId/cart', cart.createCart)
+router.get('/users/:userId/cart', cart.getCart)
+
 
 
 

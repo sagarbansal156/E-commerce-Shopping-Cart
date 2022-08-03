@@ -170,6 +170,12 @@ const updateUser = async (req, res) => {
 
         //let validUserId = req.decodedToken.userId
 
+         //fname and lname 
+        //  if (isEmptyVar(data.fname)) return res.status(400).send({ status: false, Message: "Please provide user's first name" })
+        //  if (!isREgexName(data.fname)) return res.status(400).send({ status: false, Message: "Please provide user's first name in alphabets" })
+        //  if (isEmptyVar(data.lname)) return res.status(400).send({ status: false, Message: "Please provide user's last name" })
+        //  if (!isREgexName(data.lname)) return res.status(400).send({ status: false, Message: "Please provide user's lname name in alphabets" })
+ 
 
         if (isEmptyVar(data) && isEmptyFile(files)) return res.status(400).send({ status: false, message: " BODY must be required!" })
 
@@ -227,6 +233,7 @@ const updateUser = async (req, res) => {
         }
 
         if (!isEmptyVar(address)) {
+          // shipping address validation
             // shipping address validation
             if (!isEmptyVar(address.shipping)) {
                 if (!isEmptyVar(address.shipping.street)) {
