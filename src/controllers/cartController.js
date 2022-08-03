@@ -13,7 +13,6 @@ const create = async (req, res) => {
         if (validate.isEmptyVar(data)) 
         return res.status(400).send({ status: false, Message: " Post Body is empty, Please add some key-value pairs" })
         
-
         // destructure data here
         let { productId, quantity, cartId } = data
         // if quantity does't exist then add 1 default
@@ -39,7 +38,7 @@ const create = async (req, res) => {
 
         // check product exist or not;
         const product = await productModel.findOne({ _id: productId, isDeleted: false })
-        console.log(product)
+        //console.log(product)
         if (!product) return res.status(404).send({ status: false, Message: " productId not found!" })
 
         // check if the cart is already exist or not
@@ -50,7 +49,7 @@ const create = async (req, res) => {
             if (!validate.isValidObjectId(cartId)) return res.status(400).send({ status: false, Message: " cart Id is not Valid!" })
             // check both cartid's from req.body and db cart are match or not?
             if (cart._id != cartId) 
-            return res.status(400).send({ status: false, Message: " CartId does\'t belong to this user!" })
+            return res.status(400).send({ status: false, Message: " CartId does't belong to this user!" })
            
 
           
