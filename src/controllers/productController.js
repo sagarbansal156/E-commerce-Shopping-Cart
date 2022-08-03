@@ -217,6 +217,12 @@ const updateProductById = async function (req, res) {
             tempArr.push(...availableSizeObj)
             tempArr = [...new Set(tempArr)] // set {"S", "XS", "M"}
             checkProductId.availableSizes = tempArr
+          
+          if (!validate.isEmptyVar(availableSizes)) {
+                if (!validate.isValidSize(availableSizes)) 
+                return res.status(400).send({ status: false, Message: ` availableSizes is only accept S , XS , M , X , L , XXL , XL !` })
+                 checkProductId.availableSizes.push(availableSizes)
+             }
          }
 
         if (!validate.isEmptyVar(title)) {
@@ -232,10 +238,7 @@ const updateProductById = async function (req, res) {
           const profile_url = await AwsService.uploadFile(files[0]);
           checkProductId.productImage = profile_url
       }
-      else {
-          return res.status(400).send({ status: false, message: 'Profile Image is required !' })
-      }
-
+      
         await checkProductId.save();
         res.status(200).send({ status: true, message: " Product info updated successfully!", data: checkProductId });
     } catch (error) {
