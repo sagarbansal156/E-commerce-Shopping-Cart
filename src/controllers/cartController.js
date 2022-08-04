@@ -201,7 +201,7 @@ const getCart = async (req, res) =>{
         if (!cartRes) {
             return res.status(400).send({status: false,message: 'Cart not found !'});
         }
-        const deleteRes = await cartModel.findOneAndUpdate({userId: req.params.userId},{totalItems: 0,totalPrice: 0,items: []});
+        await cartModel.findOneAndUpdate({userId: req.params.userId},{totalItems: 0,totalPrice: 0,items: []});
 
         return res.status(204).send({status: true,message: "Delete cart success"});
     } catch (error) {
