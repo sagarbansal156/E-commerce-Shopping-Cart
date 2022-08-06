@@ -62,7 +62,7 @@ const addProduct = async (req, res) => {
       }
   
       //checking for available Sizes of the products
-      if(validate.isEmptyVar(data.availableSizes) && validate.isValidString(data.availableSizes))  return res.status(400).send({ status: false, message: "Enter at least one available size" });
+      if(validate.isEmptyVar(data.availableSizes))  return res.status(400).send({ status: false, message: "Enter at least one available size" });
   
       if (data.availableSizes) {
         var availableSize = data.availableSizes.toUpperCase().split(",") // Creating an array

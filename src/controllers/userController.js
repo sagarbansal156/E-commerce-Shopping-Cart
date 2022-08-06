@@ -147,7 +147,7 @@ const getUser = async function (req, res) {
         let checkUser = await userModel.findOne({ _id: filter, isDeleted: false }) //Check book Name From DB/
         if (!checkUser) return res.status(404).send({ status: true, message: "No such user found" });
 
-        if (filter != validUserId) return res.status(400).send({ status: false, message: "please enter existing user" })
+        if (filter != validUserId) return res.status(403).send({ status: false, message: "please enter valid user" })
 
         let getUserData = await userModel.findOne({ _id: filter, isDeleted: false })
         return res.status(200).send({ status: true, message: "User profile details", data: getUserData });
@@ -165,10 +165,14 @@ const updateUser = async (req, res) => {
 
         const data = req.body
         const files = req.files
-        const userId = req.params.userId
+        const filter = req.params.userId
 
 
-        //let validUserId = req.decodedToken.userId
+        let validUserId = req.tokenData.userId
+
+        if (req.params.hasOwnProperty('userId')) {
+            if (!isValidObjectId(filter)) return res.status(400).send({ status: false, message: "please enter the valid userId!" })
+        }
 
          //fname and lname 
         //  if (isEmptyVar(data.fname)) return res.status(400).send({ status: false, Message: "Please provide user's first name" })
@@ -180,9 +184,9 @@ const updateUser = async (req, res) => {
         if (isEmptyVar(data) && isEmptyFile(files)) return res.status(400).send({ status: false, message: " BODY must be required!" })
 
         // get User by userID
-        const user = await userModel.findById(userId)
+        const user = await userModel.findById(filter)
         if (!user) return res.status(404).send({ status: false, message: " User data not found!" })
-        // if (userId != validUserId) return res.status(403).send({ status: false, message: "Error, authorization failed" });
+        if (filter != validUserId) return res.status(403).send({ status: false, message: "Error, authorization failed" });
 
         // de-structure data
         let { fname, lname, email, phone, password, address } = data
@@ -222,14 +226,11 @@ const updateUser = async (req, res) => {
             if (!isValidPhone(phone)) return res.status(400).send({ status: false, message: " Invalid phone number!" })
             let usedMobileNumber = await userModel.findOne({ phone: phone });
             if (usedMobileNumber) return res.status(400).send({ status: false, Message: "This Mobile no. is already registerd" });
-
-            user.phone = phone
+             user.phone = phone
         }
 
         if (!isEmptyVar(password)) {
             if (!isValidPassword(password)) return res.status(400).send({ status: false, Message: "password should be a mix of letters (uppercase and lowercase), numbers, and symbol" });
-            //const encryptedPassword = await bcrypt.hash(password, saltRounds)
-            user.password = password
         }
 
         if (!isEmptyVar(address)) {
