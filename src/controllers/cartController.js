@@ -76,7 +76,7 @@ const createCart = async (req, res) => {
             cart.totalItems = cart.items.length
             // update cart
             await cart.save()
-            return res.status(201).send({ status: true, Message: " Item added successfully and Cart updated!" })
+            return res.status(201).send({ status: true, Message: " Item added successfully and Cart updated!" , data:cart})
            
         }
 
@@ -93,21 +93,22 @@ const createCart = async (req, res) => {
         }
 
         const createCart = await cartModel.create(object)
-        return res.status(201).send({ status: true, Message: "Item added successfully in the  New cart created!" })
+        return res.status(201).send({ status: true, Message: "Item added successfully in the  New cart created!", data:createCart })
        
 
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message });
     }
 }
+
 const updateCart = async function (req, res) {
     try {
         let data = req.body
         //empty body validation
         let userId = req.params.userId
-        let validUserId = req.tokenData.userId
+        //let validUserId = req.tokenData.userId
 
-        if (userId != validUserId) return res.status(403).send({ status: false, message: "Error, authorization failed" });
+        //if (userId != validUserId) return res.status(403).send({ status: false, message: "Error, authorization failed" });
 
         
 if (!Object.keys(data).length) { return res.status(400).send({ status: false, message: "Data can't be empty" }) }
@@ -115,14 +116,14 @@ if (!Object.keys(data).length) { return res.status(400).send({ status: false, me
 
         // CartId Validation
         if (!cartId) return res.status(400).send({ status: false, message: "Please mention cartID" })
-        if(!mongoose.isValidObjectId(cartId)) return res.status(400).send({ status: false, message: "Please mention valid cartID" })
+        if(!validate.isValidObjectId(cartId)) return res.status(400).send({ status: false, message: "Please mention valid cartID" })
         let cart = await cartModel.findById({ _id: cartId })
         if (!cart) { return res.status(400).send({ status: false, message: "No such cart found" }) }
         if(cart.items.length == 0){ return res.status(400).send({ status: false, message: "Nothing to delete in item " }) }
 
         //productId validation
         if (!productId) return res.status(400).send({ status: false, message: "Please mention productID" })
-        if(!mongoose.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Please mention valid productID"})
+        if(!validate.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Please mention valid productID"})
         let product = await productModel.findById({ _id: productId, isDeleted: false })
         if (!product) { return res.status(400).send({ status: false, message: "No such product found in cart " }) }
         //  if (!removeProduct) return res.status(400).send({ status: false, message: "Please mention what to do" })
@@ -194,6 +195,7 @@ const getCart = async (req, res) =>{
       res.status(500).send({ status: false, error: err.message })
     }
   }
+  
   const deleteCart = async (req, res) => {
     try {
         const cartRes = await cartModel.findOne({userId: req.params.userId});

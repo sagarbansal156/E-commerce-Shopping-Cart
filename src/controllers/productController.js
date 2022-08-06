@@ -262,7 +262,7 @@ const updateProductById = async function (req, res) {
         product.isDeleted = true;
         product.deletedAt = new Date();
         await product.save();
-        res.status(200).send({ status: true, Message: " Product deleted successfully!" })
+        res.status(204).send({ status: true, Message: " Product deleted successfully!" })
     } catch (err) {
         res.status(500).send({ status: true, Message: err.message })
     }
