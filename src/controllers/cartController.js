@@ -8,6 +8,11 @@ const createCart = async (req, res) => {
         // get body here
         const data = req.body
         const userId = req.params.userId
+        let validUserId = req.tokenData.userId
+
+
+        if (userId != validUserId) return res.status(403).send({ status: false, message: "Error, authorization failed" });
+
 
         // check body validation
         if (validate.isEmptyVar(data)) 
@@ -42,7 +47,7 @@ const createCart = async (req, res) => {
         console.log(product)
         if (!product) return res.status(404).send({ status: false, Message: " productId not found!" })
 
-        // check if the cart is already exist or not
+        // check if the cart is already exist 
         const cart = await cartModel.findOne({ userId })
         if (cart) {
             // validate cartID
@@ -50,7 +55,7 @@ const createCart = async (req, res) => {
             if (!validate.isValidObjectId(cartId)) return res.status(400).send({ status: false, Message: " cart Id is not Valid!" })
             // check both cartid's from req.body and db cart are match or not?
             if (cart._id != cartId) 
-            return res.status(400).send({ status: false, Message: " CartId does\'t belong to this user!" })
+            return res.status(400).send({ status: false, Message: " CartId doesn't belong to this user!" })
            
 
           
@@ -77,7 +82,7 @@ const createCart = async (req, res) => {
             cart.totalItems = cart.items.length
             // update cart
             await cart.save()
-            return res.status(201).send({ status: true, Message: " Item added successfully and Cart updated!" })
+            return res.status(201).send({ status: true, Message: " Item added successfully and Cart updated!",data:cart })
            
         }
 
@@ -94,7 +99,7 @@ const createCart = async (req, res) => {
         }
 
         const createCart = await cartModel.create(object)
-        return res.status(201).send({ status: true, Message: "Item added successfully in the  New cart created!" })
+        return res.status(201).send({ status: true, Message: "Item added successfully in the  New cart created!",data:createCart})
        
 
     } catch (error) {
@@ -113,17 +118,18 @@ const updateCart = async function (req, res) {
         
 if (!Object.keys(data).length) { return res.status(400).send({ status: false, message: "Data can't be empty" }) }
         const { cartId, productId, removeProduct } = data
+        console.log(data)
 
         // CartId Validation
         if (!cartId) return res.status(400).send({ status: false, message: "Please mention cartID" })
-        if(!mongoose.isValidObjectId(cartId)) return res.status(400).send({ status: false, message: "Please mention valid cartID" })
+        if(!validate.isValidObjectId(cartId)) return res.status(400).send({ status: false, message: "Please mention valid cartID" })
         let cart = await cartModel.findById({ _id: cartId })
         if (!cart) { return res.status(400).send({ status: false, message: "No such cart found" }) }
         if(cart.items.length == 0){ return res.status(400).send({ status: false, message: "Nothing to delete in item " }) }
 
         //productId validation
         if (!productId) return res.status(400).send({ status: false, message: "Please mention productID" })
-        if(!mongoose.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Please mention valid productID"})
+        if(!validate.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "Please mention valid productID"})
         let product = await productModel.findById({ _id: productId, isDeleted: false })
         if (!product) { return res.status(400).send({ status: false, message: "No such product found in cart " }) }
         //  if (!removeProduct) return res.status(400).send({ status: false, message: "Please mention what to do" })
@@ -185,6 +191,13 @@ if (!Object.keys(data).length) { return res.status(400).send({ status: false, me
 const getCart = async (req, res) =>{
     try {
       let userId = req.params.userId;
+      let validUserId = req.tokenData.userId
+
+
+        if(!validate.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "Please mention valid userId" })
+
+        if (userId != validUserId) return res.status(403).send({ status: false, message: "Error, authorization failed" });
+
   
       //checking if the cart exist with this userId or not
       let findCart = await cartModel.findOne({ userId: userId }).populate('items.productId');

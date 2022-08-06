@@ -135,7 +135,7 @@ const addProduct = async (req, res) => {
             queryData.isDeleted = false;
             queryData.deletedAt = null;
 
-            const filterData = await productModel.find(queryData).sort({ price: 1 });
+           const filterData = await productModel.find(queryData).sort({ price: 1 });
             if (filterData.length == 0) {
                 return res.status(404).send({ status: false, message: 'Product not found !' });
             }
@@ -201,20 +201,12 @@ const updateProductById = async function (req, res) {
         if (!validate.isEmptyVar(style)) { checkProductId.style = style }
         if (!validate.isEmptyVar(installments)) { checkProductId.installments = installments }
         if (!validate.isEmptyVar(availableSizes)) {
-            // approach 1
-            let availableSizeObj = validate.isValidJSONstr(availableSizes)
-
-            if (!availableSizeObj) 
-            return res.status(400).send({ status: false, Message: `in availableSizes, invalid json !` })
-
-            if (!Array.isArray(availableSizeObj)) 
-            return res.status(400).send({ status: false, Message: ` in availableSizes, invalid array !` })
-
-            if (!checkArrContent(availableSizeObj, "S", "XS", "M", "X", "L", "XXL", "XL")) 
+            
+            if (!validate.isValidSize(availableSizes, "S", "XS", "M", "X", "L", "XXL", "XL")) 
             return res.status(400).send({ status: false, Message: ` availableSizes is only accept S , XS , M , X , L , XXL , XL !` })
 
             let tempArr = [...checkProductId.availableSizes]
-            tempArr.push(...availableSizeObj)
+            tempArr.push(...availableSizes)
             tempArr = [...new Set(tempArr)] // set {"S", "XS", "M"}
             checkProductId.availableSizes = tempArr
           

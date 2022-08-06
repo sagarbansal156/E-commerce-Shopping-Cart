@@ -21,16 +21,16 @@ router.delete("/products/:productId", productController.deleteProduct);
 router.put("/products/:productId",productController.updateProductById);
 
 //--------cart Api-----------//
-router.post('/users/:userId/cart', cart.createCart)
-router.get('/users/:userId/cart', cart.getCart)
-router.put('/users/:userId/cart', cart.updateCart)
-router.delete('/users/:userId/cart', cart.deleteCart)
+router.post('/users/:userId/cart',middleWare.authentication, cart.createCart)
+router.get('/users/:userId/cart', middleWare.authentication, cart.getCart)
+router.put('/users/:userId/cart', middleWare.authentication, cart.updateCart)
+router.delete('/users/:userId/cart', middleWare.authentication, cart.deleteCart)
 
 
 
 //----------order Api-----------//
-router.post('/users/:userId/orders',orderController.createOrder)
-router.put('/users/:userId/orders',orderController.updateOrder)
+router.post('/users/:userId/orders',middleWare.authentication,orderController.createOrder)
+router.put('/users/:userId/orders',middleWare.authentication,orderController.updateOrder)
 
 
 

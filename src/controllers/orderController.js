@@ -1,18 +1,29 @@
 const orderModel = require('../models/orderModel')
 const cartModel = require('../models/cartModel')
 const validate = require('../validator/validate.js')
+const userModel = require('../models/userModel')
+
 
 const createOrder = async function (req, res) {
 
     try {
         let requestBody = req.body;
         const userId = req.params.userId
+        let validUserId = req.tokenData.userId
 
-        const { cartId, cancellable,status } = requestBody
+        if (userId != validUserId) return res.status(403).send({ status: false, message: "Error, authorization failed" });
+
+       
+
+        const { cartId, cancellable } = requestBody
         if (validate.isEmptyVar(requestBody)) { return res.status(400).send({ status: false, Message: ' Please provide Post Body' }); }
 
         if (validate.isEmptyVar(cartId)) { return res.status(400).send({ status: false, Message: ' Please provide cartId' }) }
         if (!validate.isValidObjectId(cartId)) { return res.status(400).send({ status: false, Message: 'Please provide a valid cartId' }) }
+
+        if (!validate.isValidObjectId(userId)) { return res.status(400).send({ status: false, Message: 'Please provide a valid userId' }) }
+         const isUser = await userModel.findOne({ _id:userId })
+        if (!isUser) return res.status(404).send({ status: false, Message: ` user is unavailable` })
 
         // use userid to find cart
         const cart = await cartModel.findOne({ userId })
@@ -25,7 +36,7 @@ const createOrder = async function (req, res) {
         items.forEach(each => totalQuantity += each.quantity);
 
         // object that use to create order
-        const Obj = { userId, items, totalPrice, totalItems, totalQuantity, cancellable,status }
+        const Obj = { userId, items, totalPrice, totalItems, totalQuantity, cancellable }
 
         const createProduct = await orderModel.create(Obj);
 
@@ -39,7 +50,11 @@ const createOrder = async function (req, res) {
 const updateOrder = async function (req, res) {
     const userId = req.params.userId
     const requestBody = req.body
-    // 👍 Authroization is being checked through Auth(Middleware)
+    let validUserId = req.tokenData.userId
+
+    if (userId != validUserId) return res.status(403).send({ status: false, message: "Error, authorization failed" });
+
+    
 
     let { orderId, status } = requestBody
     if (validate.isEmptyVar(requestBody)) { return res.status(400).send({ status: false, Message: 'Invalid request Body' }) }
