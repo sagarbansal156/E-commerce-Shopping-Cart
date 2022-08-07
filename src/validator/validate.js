@@ -38,13 +38,6 @@ const isValidObjectId = (ObjectId) => {
 const isPincodeValid = function (value) {
     return /^[1-9]{1}[0-9]{5}$/.test(value);
 }
-/*let isValidJSONstr = (json) => {
-    try {
-        return JSON.parse(json)
-    } catch (_) {
-        return false
-    }
-}*/
 
 let isEmptyFile = (file) => {
     if (!file || file.length == 0) return true
@@ -64,16 +57,6 @@ const isValidSize = (sizes) => {
 
 
 module.exports = {
-    isEmptyVar,
-    isREgexName,
-    isValidString,
-    isValidPrice,
-    isValidEmail,
-    isValidPhone,
-    isValidPassword,
-    isValidObjectId,
-    isPincodeValid,
-    isEmptyFile,
-    acceptFileType,
-    isValidSize 
+    isEmptyVar,isREgexName,isValidString,isValidPrice,isValidEmail,isValidPhone,isValidPassword,
+    isValidObjectId,isPincodeValid,isEmptyFile,acceptFileType,isValidSize 
 }
