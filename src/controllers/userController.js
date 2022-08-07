@@ -36,7 +36,6 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, message: 'Profile Image is required !' })
         }
 
-
         //phone number
         if (isEmptyVar(phone)) return res.status(400).send({ status: false, Message: "Please provide phone number" })
         if (!isValidPhone(phone)) return res.status(400).send({ status: false, Message: "please provide valid phone number" });
@@ -184,22 +183,10 @@ const updateUser = async (req, res) => {
             if (!isValidEmail(email)) return res.status(400).send({ status: false, message: " Invalid email address!" })
             let usedEmail = await userModel.findOne({ email: email });
             if (usedEmail) return res.status(400).send({ status: false, Message: "This email is already registerd" });
-
-            user.email = email
+             user.email = email
         }
 
-        if (files && files.length > 0) {
-            if (files[0].mimetype.indexOf('image') == -1) {
-                return res.status(400).send({ status: false, message: 'Only image files are allowed !' })
-            }
-            const profile_url = await AwsService.uploadFile(files[0]);
-            files.profileImage = profile_url;
-        }
-        else {
-            return res.status(400).send({ status: false, message: 'Profile Image is required !' })
-        }
-
-        if (!isEmptyVar(phone)) {
+       if (!isEmptyVar(phone)) {
             if (!isValidPhone(phone)) return res.status(400).send({ status: false, message: " Invalid phone number!" })
             let usedMobileNumber = await userModel.findOne({ phone: phone });
             if (usedMobileNumber) return res.status(400).send({ status: false, Message: "This Mobile no. is already registerd" });
