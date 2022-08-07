@@ -1,5 +1,5 @@
 const orderModel = require('../models/orderModel')
-const cartModel = require('../models/cartModels')
+const cartModel = require('../models/cartModel')
 const validate = require('../validator/validate.js')
 
 const createOrder = async function (req, res) {
@@ -8,7 +8,7 @@ const createOrder = async function (req, res) {
         let requestBody = req.body;
         const userId = req.params.userId
 
-        const { cartId, cancellable } = requestBody
+        const { cartId, cancellable,status } = requestBody
         if (validate.isEmptyVar(requestBody)) { return res.status(400).send({ status: false, Message: ' Please provide Post Body' }); }
 
         if (validate.isEmptyVar(cartId)) { return res.status(400).send({ status: false, Message: ' Please provide cartId' }) }
@@ -25,7 +25,7 @@ const createOrder = async function (req, res) {
         items.forEach(each => totalQuantity += each.quantity);
 
         // object that use to create order
-        const Obj = { userId, items, totalPrice, totalItems, totalQuantity, cancellable }
+        const Obj = { userId, items, totalPrice, totalItems, totalQuantity, cancellable,status }
 
         const createProduct = await orderModel.create(Obj);
 
@@ -34,4 +34,32 @@ const createOrder = async function (req, res) {
     } catch (error) { res.status(500).send({ status: false, Message: error.message }) }
 }
 
-module.exports={createOrder}
+
+
+const updateOrder = async function (req, res) {
+    const userId = req.params.userId
+    const requestBody = req.body
+    // 👍 Authroization is being checked through Auth(Middleware)
+
+    let { orderId, status } = requestBody
+    if (validate.isEmptyVar(requestBody)) { return res.status(400).send({ status: false, Message: 'Invalid request Body' }) }
+    if (validate.isEmptyVar(orderId)) { return res.status(400).send({ status: false, Message: 'Please provide orderId' }) }
+    if (!validate.isValidObjectId(userId)) { return res.status(400).send({ status: false, Message: 'Please provide valid userId through Params' }) }
+    if (!validate.isValidObjectId(orderId)) { return res.status(400).send({ status: false, Message: 'Please provide valid orderId' }) }
+    if (!orderId) { return res.status(400).send({ status: false, Message: `Order does not exist for ${orderId}` }) }
+    if (validate.isEmptyVar(status)) { return res.status(400).send({ status: false, Message: 'Status required' }) }
+    if (!["pending", "completed", "canceled"].includes(status)) { return res.status(400).send({ status: false, Message: 'Status should be only ["pending", "completed", "canceled"]' }) }
+
+    const userByOrder = await orderModel.findOne({ _id: orderId, userId })
+    if (!userByOrder) { return res.status(400).send({ status: false, Message: `Order does not exist for ${userId}` }) }
+
+    if (status == "canceled"){
+        if (!userByOrder.cancellable) { return res.status(400).send({ status: false, Message: "This order can't be cancelled because it is not allowed(cancellable=false)" }) }
+    }
+    // if (userByOrder["status"] == "completed") { return res.status(400).send({ status: false, Message: "This order is already compleated so you can't update it's status" }) }
+
+    const updateOrder = await orderModel.findOneAndUpdate({ _id: orderId, userId }, { $set: { status } }, { new: true })
+    return res.status(200).send({ status: true, data: updateOrder, Message: "😍 Order updated successfully" })
+}
+
+module.exports={createOrder,updateOrder}
