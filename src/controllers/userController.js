@@ -8,13 +8,11 @@ const { isEmptyVar, isREgexName, isValidEmail, isValidPhone, isValidPassword, is
 const createUser = async function (req, res) {
     try {
         const requestBody = req.body
-        //console.log(requestBody)
         if (isEmptyVar(requestBody)) return res.status(400).send({ status: false, Message: "Invalid request parameters, Please provide user details" })
 
         let { fname, lname, email, phone, password, address } = requestBody
 
         const file = req.files
-
 
         //fname and lname 
         if (isEmptyVar(fname)) return res.status(400).send({ status: false, Message: "Please provide user's first name" })
@@ -47,8 +45,8 @@ const createUser = async function (req, res) {
         if (isEmptyVar(password)) return res.status(400).send({ status: false, Message: "Please provide password" })
         if (!isValidPassword(password)) return res.status(400).send({ status: false, Message: "password should be a mix of letters (uppercase and lowercase), numbers, and symbol" });
 
+        //address
         if (isEmptyVar(address)) return res.status(400).send({ status: false, Message: "Please provide address" })
-
         // shipping address validation
         if (isEmptyVar(address.shipping)) return res.status(400).send({ status: false, Message: "Please provide shipping address" })
         if (isEmptyVar(address.shipping.street)) return res.status(400).send({ status: false, Message: "Plz provide shipping street..!!" });
@@ -87,11 +85,8 @@ const createUser = async function (req, res) {
 
 const login = async (req, res) => {
     try {
-        //  get data from body
         const data = req.body
         if (isEmptyVar(data)) return res.status(400).send({ status: false, message: " Login BODY must be required!" })
-
-        //  de-structure data 
         let { email, password } = data;
 
         //  Basic validations
@@ -129,12 +124,7 @@ const login = async (req, res) => {
     }
 }
 
-
-
-
-
 const getUser = async function (req, res) {
-
     try {
 
         let filter = req.params.userId
@@ -161,26 +151,14 @@ const getUser = async function (req, res) {
 
 const updateUser = async (req, res) => {
     try {
-        //  get data from body
-
         const data = req.body
         const files = req.files
         const filter = req.params.userId
-
-
         let validUserId = req.tokenData.userId
 
         if (req.params.hasOwnProperty('userId')) {
             if (!isValidObjectId(filter)) return res.status(400).send({ status: false, message: "please enter the valid userId!" })
         }
-
-         //fname and lname 
-        //  if (isEmptyVar(data.fname)) return res.status(400).send({ status: false, Message: "Please provide user's first name" })
-        //  if (!isREgexName(data.fname)) return res.status(400).send({ status: false, Message: "Please provide user's first name in alphabets" })
-        //  if (isEmptyVar(data.lname)) return res.status(400).send({ status: false, Message: "Please provide user's last name" })
-        //  if (!isREgexName(data.lname)) return res.status(400).send({ status: false, Message: "Please provide user's lname name in alphabets" })
- 
-
         if (isEmptyVar(data) && isEmptyFile(files)) return res.status(400).send({ status: false, message: " BODY must be required!" })
 
         // get User by userID
@@ -221,12 +199,11 @@ const updateUser = async (req, res) => {
             return res.status(400).send({ status: false, message: 'Profile Image is required !' })
         }
 
-
         if (!isEmptyVar(phone)) {
             if (!isValidPhone(phone)) return res.status(400).send({ status: false, message: " Invalid phone number!" })
             let usedMobileNumber = await userModel.findOne({ phone: phone });
             if (usedMobileNumber) return res.status(400).send({ status: false, Message: "This Mobile no. is already registerd" });
-             user.phone = phone
+            user.phone = phone
         }
 
         if (!isEmptyVar(password)) {
@@ -234,17 +211,14 @@ const updateUser = async (req, res) => {
         }
 
         if (!isEmptyVar(address)) {
-          // shipping address validation
             // shipping address validation
             if (!isEmptyVar(address.shipping)) {
                 if (!isEmptyVar(address.shipping.street)) {
                     user.address.shipping.street = address.shipping.street
                 }
-
                 if (!isEmptyVar(address.shipping.city)) {
                     user.address.shipping.city = address.shipping.city
                 }
-
                 if (!address.shipping.pincode || isNaN(address.shipping.pincode)) {
                     if (!isPincodeValid(address.shipping.pincode)) return res.status(400).send({ status: false, Message: "Plz provide a valid pincode for shipping" });
                     user.address.shipping.pincode = address.shipping.pincode
